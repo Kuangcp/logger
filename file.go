@@ -26,6 +26,7 @@ type fileLogger struct {
 	MaxDays    int64  `json:"maxdays"`
 	Level      string `json:"level"`
 	PermitMask string `json:"permit"`
+	Colorful   bool   `json:"color"`
 
 	LogLevel             int
 	maxSizeCurSize       int
@@ -46,8 +47,10 @@ type fileLogger struct {
 //	"rotate":true,
 //  	"permit":"0600"
 //	}
-func (f *fileLogger) Init(jsonConfig string) error {
-	fmt.Printf("fileLogger Init:%s\n", jsonConfig)
+func (f *fileLogger) Init(debug bool, jsonConfig string) error {
+	if debug {
+		fmt.Printf("fileLogger Init:%s\n", jsonConfig)
+	}
 	if len(jsonConfig) == 0 {
 		return nil
 	}
@@ -107,6 +110,10 @@ func (f *fileLogger) LogWrite(when time.Time, msgText interface{}, level int) er
 	}
 
 	f.Lock()
+	if f.Colorful {
+		msg = colors[level](msg)
+	}
+
 	_, err := f.fileWriter.Write([]byte(msg))
 	if err == nil {
 		f.maxLinesCurLines++

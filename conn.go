@@ -23,11 +23,13 @@ type connLogger struct {
 	illNetFlag     bool //网络异常标记
 }
 
-func (c *connLogger) Init(jsonConfig string) error {
+func (c *connLogger) Init(debug bool, jsonConfig string) error {
 	if len(jsonConfig) == 0 {
 		return nil
 	}
-	fmt.Printf("consoleWriter Init:%s\n", jsonConfig)
+	if debug {
+		fmt.Printf("consoleWriter Init:%s\n", jsonConfig)
+	}
 	err := json.Unmarshal([]byte(jsonConfig), c)
 	if err != nil {
 		return err

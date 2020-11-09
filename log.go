@@ -62,7 +62,7 @@ const (
 
 // log provider interface
 type Logger interface {
-	Init(config string) error
+	Init(debug bool, config string) error
 	LogWrite(when time.Time, msg interface{}, level int) error
 	Destroy()
 }
@@ -102,7 +102,7 @@ type LocalLogger struct {
 	usePath    string
 }
 
-func NewLogger(depth ...int) *LocalLogger {
+func NewLogger(debug bool, depth ...int) *LocalLogger {
 	dep := append(depth, 2)[0]
 	l := new(LocalLogger)
 	// appName用于记录网络传输时标记的程序发送方，
@@ -113,13 +113,14 @@ func NewLogger(depth ...int) *LocalLogger {
 	}
 	l.appName = "[" + appSn + "]"
 	l.callDepth = dep
-	l.SetLogger(AdapterConsole)
+	l.SetLogger(AdapterConsole, debug)
 	l.timeFormat = logTimeDefaultFormat
 	return l
 }
 
 //配置文件
 type logConfig struct {
+	Debug      bool           `json:"Debug,omitempty"`
 	TimeFormat string         `json:"TimeFormat"`
 	Console    *consoleLogger `json:"Console,omitempty"`
 	File       *fileLogger    `json:"File,omitempty"`
@@ -127,10 +128,10 @@ type logConfig struct {
 }
 
 func init() {
-	defaultLogger = NewLogger(3)
+	defaultLogger = NewLogger(true, 3)
 }
 
-func (this *LocalLogger) SetLogger(adapterName string, configs ...string) error {
+func (this *LocalLogger) SetLogger(adapterName string, debug bool, configs ...string) error {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
@@ -159,7 +160,7 @@ func (this *LocalLogger) SetLogger(adapterName string, configs ...string) error 
 		return fmt.Errorf("unknown adaptername %s (forgotten Register?)", adapterName)
 	}
 
-	err := logger.Init(config)
+	err := logger.Init(debug, config)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "logger Init <%s> err:%v, %s output ignore!\n",
 			adapterName, err, adapterName)
@@ -217,7 +218,7 @@ func (this *LocalLogger) writeToLoggers(when time.Time, msg *loginfo, level int)
 
 func (this *LocalLogger) writeMsg(logLevel int, msg string, v ...interface{}) error {
 	if !this.init {
-		this.SetLogger(AdapterConsole)
+		this.SetLogger(AdapterConsole, false)
 	}
 	msgSt := new(loginfo)
 	src := ""
@@ -334,7 +335,7 @@ func SetLogPathTrim(trimPath string) {
 func SetLogger(param ...string) error {
 	if 0 == len(param) {
 		//默认只输出到控制台
-		defaultLogger.SetLogger(AdapterConsole)
+		defaultLogger.SetLogger(AdapterConsole, true)
 		return nil
 	}
 
@@ -368,15 +369,15 @@ func SetLogger(param ...string) error {
 	}
 	if conf.Console != nil {
 		console, _ := json.Marshal(conf.Console)
-		defaultLogger.SetLogger(AdapterConsole, string(console))
+		defaultLogger.SetLogger(AdapterConsole, conf.Debug, string(console))
 	}
 	if conf.File != nil {
 		file, _ := json.Marshal(conf.File)
-		defaultLogger.SetLogger(AdapterFile, string(file))
+		defaultLogger.SetLogger(AdapterFile, conf.Debug, string(file))
 	}
 	if conf.Conn != nil {
 		conn, _ := json.Marshal(conf.Conn)
-		defaultLogger.SetLogger(AdapterConn, string(conn))
+		defaultLogger.SetLogger(AdapterConn, conf.Debug, string(conn))
 	}
 	return nil
 }

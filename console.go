@@ -38,11 +38,11 @@ type consoleLogger struct {
 	LogLevel int
 }
 
-func (c *consoleLogger) Init(jsonConfig string) error {
+func (c *consoleLogger) Init(debug bool, jsonConfig string) error {
 	if len(jsonConfig) == 0 {
 		return nil
 	}
-	if jsonConfig != "{}" {
+	if jsonConfig != "{}" && debug {
 		fmt.Fprintf(os.Stdout, "consoleLogger Init:%s\n", jsonConfig)
 	}
 
