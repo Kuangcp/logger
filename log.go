@@ -39,14 +39,14 @@ const (
 
 // 日志等级和描述映射关系
 var LevelMap = map[string]int{
-	"EMER": LevelEmergency,
-	"ALRT": LevelAlert,
-	"CRIT": LevelCritical,
-	"EROR": LevelError,
-	"WARN": LevelWarning,
-	"INFO": LevelInformational,
-	"DEBG": LevelDebug,
-	"TRAC": LevelTrace,
+	EmergencyDesc:     LevelEmergency,
+	AlertDesc:         LevelAlert,
+	CriticalDesc:      LevelCritical,
+	ErrorDesc:         LevelError,
+	WarningDesc:       LevelWarning,
+	InformationalDesc: LevelInformational,
+	DebugDesc:         LevelDebug,
+	TraceDesc:         LevelTrace,
 }
 
 // 注册实现的适配器， 当前支持控制台，文件和网络输出
@@ -54,14 +54,14 @@ var adapters = make(map[string]Logger)
 
 // 日志记录等级字段
 var levelPrefix = [LevelTrace + 1]string{
-	"EMER",
-	"ALRT",
-	"CRIT",
-	"EROR",
-	"WARN",
-	"INFO",
-	"DEBG",
-	"TRAC",
+	EmergencyDesc,
+	AlertDesc,
+	CriticalDesc,
+	ErrorDesc,
+	WarningDesc,
+	InformationalDesc,
+	DebugDesc,
+	TraceDesc,
 }
 
 const (
