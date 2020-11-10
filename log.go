@@ -26,6 +26,17 @@ const (
 	LevelTrace                // 用户级基本输出
 )
 
+const (
+	Emergency     = "EMER" // 系统级紧急，比如磁盘出错，内存异常，网络不可用等
+	Alert         = "ALRT" // 系统级警告，比如数据库访问异常，配置文件出错等
+	Critical      = "CRIT" // 系统级危险，比如权限出错，访问异常等
+	Error         = "EROR" // 用户级错误
+	Warning       = "WARN" // 用户级警告
+	Informational = "INFO" // 用户级信息
+	Debug         = "DEBG" // 用户级调试
+	Trace         = "TRAC" // 用户级基本输出
+)
+
 // 日志等级和描述映射关系
 var LevelMap = map[string]int{
 	"EMER": LevelEmergency,
