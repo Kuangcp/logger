@@ -119,12 +119,12 @@ func NewLogger(debug bool, depth ...int) *LocalLogger {
 }
 
 //配置文件
-type logConfig struct {
+type LogConfig struct {
 	Debug      bool           `json:"Debug,omitempty"`
 	TimeFormat string         `json:"TimeFormat"`
-	Console    *consoleLogger `json:"Console,omitempty"`
-	File       *fileLogger    `json:"File,omitempty"`
-	Conn       *connLogger    `json:"Conn,omitempty"`
+	Console    *ConsoleLogger `json:"Console,omitempty"`
+	File       *FileLogger    `json:"File,omitempty"`
+	Conn       *ConnLogger    `json:"Conn,omitempty"`
 }
 
 func init() {
@@ -331,6 +331,31 @@ func SetLogPathTrim(trimPath string) {
 	defaultLogger.SetLogPathTrim(trimPath)
 }
 
+func SetLoggerConfig(conf *LogConfig) error {
+	if conf == nil {
+		//默认只输出到控制台
+		defaultLogger.SetLogger(AdapterConsole, true)
+		return nil
+	}
+
+	if conf.TimeFormat != "" {
+		defaultLogger.timeFormat = conf.TimeFormat
+	}
+	if conf.Console != nil {
+		console, _ := json.Marshal(conf.Console)
+		defaultLogger.SetLogger(AdapterConsole, conf.Debug, string(console))
+	}
+	if conf.File != nil {
+		file, _ := json.Marshal(conf.File)
+		defaultLogger.SetLogger(AdapterFile, conf.Debug, string(file))
+	}
+	if conf.Conn != nil {
+		conn, _ := json.Marshal(conf.Conn)
+		defaultLogger.SetLogger(AdapterConn, conf.Debug, string(conn))
+	}
+	return nil
+}
+
 // param 可以是log配置文件名，也可以是log配置内容,默认DEBUG输出到控制台
 func SetLogger(param ...string) error {
 	if 0 == len(param) {
@@ -340,7 +365,7 @@ func SetLogger(param ...string) error {
 	}
 
 	c := param[0]
-	conf := new(logConfig)
+	conf := new(LogConfig)
 	err := json.Unmarshal([]byte(c), conf)
 	if err != nil { //不是json，就认为是配置文件，如果都不是，打印日志，然后退出
 		// Open the configuration file

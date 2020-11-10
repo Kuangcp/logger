@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type connLogger struct {
+type ConnLogger struct {
 	sync.Mutex
 	innerWriter    io.WriteCloser
 	ReconnectOnMsg bool   `json:"reconnectOnMsg"`
@@ -19,11 +19,11 @@ type connLogger struct {
 	Net            string `json:"net"`
 	Addr           string `json:"addr"`
 	Level          string `json:"level"`
-	LogLevel       int
+	logLevel       int
 	illNetFlag     bool //网络异常标记
 }
 
-func (c *connLogger) Init(debug bool, jsonConfig string) error {
+func (c *ConnLogger) Init(debug bool, jsonConfig string) error {
 	if len(jsonConfig) == 0 {
 		return nil
 	}
@@ -35,7 +35,7 @@ func (c *connLogger) Init(debug bool, jsonConfig string) error {
 		return err
 	}
 	if l, ok := LevelMap[c.Level]; ok {
-		c.LogLevel = l
+		c.logLevel = l
 	}
 	if c.innerWriter != nil {
 		c.innerWriter.Close()
@@ -44,8 +44,8 @@ func (c *connLogger) Init(debug bool, jsonConfig string) error {
 	return nil
 }
 
-func (c *connLogger) LogWrite(when time.Time, msgText interface{}, level int) (err error) {
-	if level > c.LogLevel {
+func (c *ConnLogger) LogWrite(when time.Time, msgText interface{}, level int) (err error) {
+	if level > c.logLevel {
 		return nil
 	}
 
@@ -80,13 +80,13 @@ func (c *connLogger) LogWrite(when time.Time, msgText interface{}, level int) (e
 	return
 }
 
-func (c *connLogger) Destroy() {
+func (c *ConnLogger) Destroy() {
 	if c.innerWriter != nil {
 		c.innerWriter.Close()
 	}
 }
 
-func (c *connLogger) connect() error {
+func (c *ConnLogger) connect() error {
 	if c.innerWriter != nil {
 		c.innerWriter.Close()
 		c.innerWriter = nil
@@ -109,7 +109,7 @@ func (c *connLogger) connect() error {
 	return fmt.Errorf("hava no valid logs service addr:%v", c.Addr)
 }
 
-func (c *connLogger) needToConnectOnMsg() bool {
+func (c *ConnLogger) needToConnectOnMsg() bool {
 	if c.Reconnect {
 		c.Reconnect = false
 		return true
@@ -125,7 +125,7 @@ func (c *connLogger) needToConnectOnMsg() bool {
 	return c.ReconnectOnMsg
 }
 
-func (c *connLogger) println(when time.Time, msg *loginfo) error {
+func (c *ConnLogger) println(when time.Time, msg *loginfo) error {
 	c.Lock()
 	defer c.Unlock()
 	ss, err := json.Marshal(msg)
@@ -139,5 +139,5 @@ func (c *connLogger) println(when time.Time, msg *loginfo) error {
 }
 
 func init() {
-	Register(AdapterConn, &connLogger{LogLevel: LevelTrace})
+	Register(AdapterConn, &ConnLogger{logLevel: LevelTrace})
 }

@@ -31,19 +31,19 @@ var colors = []brush{
 	newBrush("1;32"), // Trace              绿色
 }
 
-type consoleLogger struct {
+type ConsoleLogger struct {
 	sync.Mutex
 	Level    string `json:"level"`
 	Colorful bool   `json:"color"`
-	LogLevel int
+	logLevel int
 }
 
-func (c *consoleLogger) Init(debug bool, jsonConfig string) error {
+func (c *ConsoleLogger) Init(debug bool, jsonConfig string) error {
 	if len(jsonConfig) == 0 {
 		return nil
 	}
 	if jsonConfig != "{}" && debug {
-		fmt.Fprintf(os.Stdout, "consoleLogger Init:%s\n", jsonConfig)
+		fmt.Fprintf(os.Stdout, "ConsoleLogger Init:%s\n", jsonConfig)
 	}
 
 	err := json.Unmarshal([]byte(jsonConfig), c)
@@ -52,15 +52,15 @@ func (c *consoleLogger) Init(debug bool, jsonConfig string) error {
 	}
 
 	if l, ok := LevelMap[c.Level]; ok {
-		c.LogLevel = l
+		c.logLevel = l
 		return nil
 	}
 
 	return err
 }
 
-func (c *consoleLogger) LogWrite(when time.Time, msgText interface{}, level int) error {
-	if level > c.LogLevel {
+func (c *ConsoleLogger) LogWrite(when time.Time, msgText interface{}, level int) error {
+	if level > c.logLevel {
 		return nil
 	}
 	msg, ok := msgText.(string)
@@ -74,19 +74,19 @@ func (c *consoleLogger) LogWrite(when time.Time, msgText interface{}, level int)
 	return nil
 }
 
-func (c *consoleLogger) Destroy() {
+func (c *ConsoleLogger) Destroy() {
 
 }
 
-func (c *consoleLogger) printlnConsole(when time.Time, msg string) {
+func (c *ConsoleLogger) printlnConsole(when time.Time, msg string) {
 	c.Lock()
 	defer c.Unlock()
 	os.Stdout.Write(append([]byte(msg), '\n'))
 }
 
 func init() {
-	Register(AdapterConsole, &consoleLogger{
-		LogLevel: LevelDebug,
+	Register(AdapterConsole, &ConsoleLogger{
+		logLevel: LevelDebug,
 		Colorful: runtime.GOOS != "windows",
 	})
 }

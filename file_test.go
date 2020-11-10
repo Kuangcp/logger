@@ -115,11 +115,11 @@ func TestFileByMaxLine(t *testing.T) {
 func TestFileByTime(t *testing.T) {
 	fn1 := "rotate_day.log"
 	fn2 := "rotate_day" + fmt.Sprintf(".%s.%03d", time.Now().Add(-24*time.Hour).Format("2006-01-02"), 1) + ".log"
-	fw := &fileLogger{
+	fw := &FileLogger{
 		Daily:      true,
 		MaxDays:    7,
 		Append:     true,
-		LogLevel:   LevelTrace,
+		logLevel:   LevelTrace,
 		PermitMask: "0660",
 	}
 	fw.Init(fmt.Sprintf(`{"filename":"%v","maxdays":1}`, fn1))
