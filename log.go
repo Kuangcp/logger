@@ -65,10 +65,11 @@ var levelPrefix = [LevelTrace + 1]string{
 }
 
 const (
-	logTimeDefaultFormat = "2006-01-02 15:04:05" // 日志输出默认格式
-	AdapterConsole       = "console"             // 控制台输出配置项
-	AdapterFile          = "file"                // 文件输出配置项
-	AdapterConn          = "conn"                // 网络输出配置项
+	LogTimeDefaultFormat = "2006-01-02 15:04:05"     // 日志输出默认格式
+	LogTimeDetailFormat  = "2006-01-02 15:04:05.000" // 日志输出完整格式
+	AdapterConsole       = "console"                 // 控制台输出配置项
+	AdapterFile          = "file"                    // 文件输出配置项
+	AdapterConn          = "conn"                    // 网络输出配置项
 )
 
 // log provider interface
@@ -115,18 +116,18 @@ type LocalLogger struct {
 
 func NewLogger(debug bool, depth ...int) *LocalLogger {
 	dep := append(depth, 2)[0]
-	l := new(LocalLogger)
+	newLog := new(LocalLogger)
 	// appName用于记录网络传输时标记的程序发送方，
 	// 通过环境变量APPSN进行设置,默认为NONE,此时无法通过网络日志检索区分不同服务发送方
 	appSn := os.Getenv("APPSN")
 	if appSn == "" {
 		appSn = "NONE"
 	}
-	l.appName = "[" + appSn + "]"
-	l.callDepth = dep
-	l.SetLogger(AdapterConsole, debug)
-	l.timeFormat = logTimeDefaultFormat
-	return l
+	newLog.appName = "[" + appSn + "]"
+	newLog.callDepth = dep
+	newLog.SetLogger(AdapterConsole, debug)
+	newLog.timeFormat = LogTimeDefaultFormat
+	return newLog
 }
 
 //配置文件
@@ -152,7 +153,7 @@ func (this *LocalLogger) SetLogger(adapterName string, debug bool, configs ...st
 	}
 
 	config := append(configs, "{}")[0]
-	var num int = -1
+	var num = -1
 	var i int
 	var l *nameLogger
 	for i, l = range this.outputs {
@@ -342,6 +343,19 @@ func SetLogPathTrim(trimPath string) {
 	defaultLogger.SetLogPathTrim(trimPath)
 }
 
+//	_ = logger.SetLoggerConfig(&logger.LogConfig{
+//		Console: &logger.ConsoleLogger{
+//			Level:    logger.DebugDesc,
+//			Colorful: true,
+//		},
+//		File: &logger.FileLogger{
+//			Filename:   "test.log",
+//			Level:      logger.DebugDesc,
+//			Colorful:   true,
+//			Append:     true,
+//			PermitMask: "0660",
+//		},
+//	})
 func SetLoggerConfig(conf *LogConfig) error {
 	if conf == nil {
 		//默认只输出到控制台
